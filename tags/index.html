@@ -81,6 +81,8 @@
 
 
 
+  <link rel="alternate" href="/atom.xml" title="CJR的博客" type="application/atom+xml">
+
 
 
 
@@ -88,14 +90,14 @@
 
 <meta name="description" content="搞IT不辛苦，就是头凉">
 <meta property="og:type" content="website">
-<meta property="og:title" content="tags">
+<meta property="og:title" content="标签">
 <meta property="og:url" content="http://jrblog.github.io/tags/index.html">
 <meta property="og:site_name" content="CJR的博客">
 <meta property="og:description" content="搞IT不辛苦，就是头凉">
 <meta property="og:locale" content="zh-Hans">
-<meta property="og:updated_time" content="2019-06-22T08:13:47.183Z">
+<meta property="og:updated_time" content="2019-06-22T15:16:43.883Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="tags">
+<meta name="twitter:title" content="标签">
 <meta name="twitter:description" content="搞IT不辛苦，就是头凉">
 
 
@@ -132,7 +134,7 @@
 
 
 
-  <title>tags | CJR的博客</title>
+  <title>标签 | CJR的博客</title>
   
 
 
@@ -294,7 +296,7 @@
     <div class="post-block page">
       <header class="post-header">
 
-	<h1 class="post-title" itemprop="name headline">tags</h1>
+	<h1 class="post-title" itemprop="name headline">标签</h1>
 
 
 
@@ -306,7 +308,14 @@
       <div class="post-body">
         
         
-          
+          <div class="tag-cloud">
+            <div class="tag-cloud-title">
+                目前共计 2 个标签
+            </div>
+            <div class="tag-cloud-tags">
+              <a href="/tags/wlan/" style="font-size: 12px; color: #ccc">wlan</a> <a href="/tags/华为/" style="font-size: 12px; color: #ccc">华为</a>
+            </div>
+          </div>
         
       </div>
       
@@ -376,18 +385,43 @@
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">3</span>
+                  <span class="site-state-item-count">4</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>
             
 
             
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">1</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
 
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">2</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
             
 
           </nav>
 
+          
+            <div class="feed-link motion-element">
+              <a href="/atom.xml" rel="alternate">
+                <i class="fa fa-rss"></i>
+                RSS
+              </a>
+            </div>
           
 
           
@@ -459,11 +493,10 @@
 
         
 <div class="busuanzi-count">
-  <script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
-
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
   
     <span class="site-uv">
-      本站访客数<i class="fa fa-user"></i>
+      <i class="fa fa-user">本站访客数</i>
       <span class="busuanzi-value" id="busuanzi_value_site_uv"></span>
       次
     </span>
@@ -471,7 +504,7 @@
 
   
     <span class="site-pv">
-      本站总访问量<i class="fa fa-eye"></i>
+      <i class="fa fa-eye">本站总访问量</i>
       <span class="busuanzi-value" id="busuanzi_value_site_pv"></span>
       次
     </span>
@@ -613,7 +646,7 @@
         var disqus_config = function () {
           this.page.url = 'http://jrblog.github.io/tags/index.html';
           this.page.identifier = 'tags/index.html';
-          this.page.title = 'tags';
+          this.page.title = '标签';
         };
         var d = document, s = d.createElement('script');
         s.src = 'https://.disqus.com/embed.js';

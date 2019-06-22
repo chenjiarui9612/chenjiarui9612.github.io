@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+  <title>CJR的博客</title>
+  
+  
+  <link href="/atom.xml" rel="self"/>
+  
+  <link href="http://jrblog.github.io/"/>
+  <updated>2019-06-22T16:44:02.408Z</updated>
+  <id>http://jrblog.github.io/</id>
+  
+  <author>
+    <name>CJR</name>
+    
+  </author>
+  
+  <generator uri="http://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>无线WLAN隧道转发模式下数据的封装以及转发过程</title>
+    <link href="http://jrblog.github.io/2019/06/22/%E6%97%A0%E7%BA%BFWLAN%E9%9A%A7%E9%81%93%E8%BD%AC%E5%8F%91%E6%A8%A1%E5%BC%8F%E4%B8%8B%E6%95%B0%E6%8D%AE%E7%9A%84%E5%B0%81%E8%A3%85%E4%BB%A5%E5%8F%8A%E8%BD%AC%E5%8F%91%E8%BF%87%E7%A8%8B/"/>
+    <id>http://jrblog.github.io/2019/06/22/无线WLAN隧道转发模式下数据的封装以及转发过程/</id>
+    <published>2019-06-22T14:10:58.515Z</published>
+    <updated>2019-06-22T16:44:02.408Z</updated>
+    
+    <content type="html"><![CDATA[<h2 id="无线WLAN隧道转发模式下数据的封装以及转发过程"><a href="#无线WLAN隧道转发模式下数据的封装以及转发过程" class="headerlink" title="无线WLAN隧道转发模式下数据的封装以及转发过程"></a>无线WLAN隧道转发模式下数据的封装以及转发过程</h2><h3 id="实验用的拓扑："><a href="#实验用的拓扑：" class="headerlink" title="实验用的拓扑："></a>实验用的拓扑：</h3><p><img src="https://i.loli.net/2019/06/23/5d0e580d13d7299434.png" alt="5d0e580d13d7299434"></p><ul><li><p>AP1、AP2的业务vlan为101、102，管理vlan为100，AR路由器作为DHCP服务器为AP和终端分配IP地址、DNS等信息。</p></li><li><p>vlan100、101、102的网关都在核心交换机上。</p></li><li><p>核心交换机上做DHCP中继，把AP与终端的dhcp请求转到服务器上。</p></li><li><p>分别使用直接转发模式和隧道转发模式。</p></li></ul><h3 id="遇到的问题"><a href="#遇到的问题" class="headerlink" title="遇到的问题"></a>遇到的问题</h3><blockquote><p>在进行完正常的配置，AP上线、下发配置后，直接转发模式下的终端连接AP结果正常，但是在改为隧道转发模式后终端却怎么也获取不到IP信息，一直处于正在连接的状态。 当时感到困惑的是，通过wireshark抓包分析发现，这个请求包在并没有按照预想的通过中继来到dhcp服务器这里，进一步分析发现终端的dhcp discover封装了两层的vlan tag，内层为AP的业务vlan，外层为管理vlan，这时才恍然大悟，隧道模式下，数据会通过隧道封装先送到AC在进行处理。而业务vlan在核心交换机也就是网关那里就终结了，AC上并没有这些vlan信息，也不能为终端提供dhcp服务，导致了终端一直处于连接的状态。 这个时候解决问题的思路也就清晰了。</p></blockquote><ul><li><p>把AC配成dhcp服务器，直接为终端提供服务</p></li><li><p>在AC上添加业务vlan的信息，把dhcp请求中继到AR路由器上，依旧由AR提供dhcp服务。</p><p><strong>通过上述方法配置后，一切就正常了。下面附上华为官方关于两种转发模式的介绍</strong>。</p></li></ul><h3 id="业务数据报文直接转发的处理流程"><a href="#业务数据报文直接转发的处理流程" class="headerlink" title="业务数据报文直接转发的处理流程"></a>业务数据报文直接转发的处理流程</h3><p>如下图所示，直接转发模式下，业务数据报文不经过CAPWAP封装。</p><ul><li><p>上行（STA–&gt;Internet）：AP收到STA的802.11格式的上行业务数据，由AP直接转换为802.3报文并标记业务VLAN s后向目的地发送。</p></li><li><p>下行（Internet–&gt;STA）：下行业务数据以802.3报文到达AP（由上层网络设备标记业务VLAN s’），由AP转换为802.11格式发送给STA。</p></li></ul><p>中间网络设备需配置和透传业务VLAN s，这种组网模式下，AC一般旁挂在核心交换机或汇聚交换机上，不承担数据业务转发功能，只对AP进行管理。如果AC处于直连位置时，数据报文也需要通过AC进行转发，此时AC可视为承担汇聚交换机功能。</p><p><img src="https://support.huawei.com/hedex/pages/EDOC1100064375AZI0130Q/03/EDOC1100064375AZI0130Q/03/resources/dc/images/fig_dc_wlan_example_000005902.png" alt="1"></p><h3 id="业务数据报文CAPWAP隧道转发的处理流程"><a href="#业务数据报文CAPWAP隧道转发的处理流程" class="headerlink" title="业务数据报文CAPWAP隧道转发的处理流程"></a>业务数据报文CAPWAP隧道转发的处理流程</h3><p>如下图所示，AP与AC之间同时建立控制隧道和数据隧道，WLAN用户业务数据和管理报文分别封装在CAPWAP数据报文和CAPWAP控制报文中，在CAPWAP隧道中传递。</p><ul><li>上行（STA–&gt;Internet）：AP收到STA的802.11格式的上行业务数据，由AP直接转换为802.3报文并标记业务VLAN s，然后AP封装上行业务数据到CAPWAP报文中；由连接AP的交换机标记管理VLAN m；AC接收后解CAPWAP封装并终结VLAN m’。</li><li>下行（Internet–&gt;STA）：下行业务数据由AC封装到CAPWAP报文中，AC允许携带VLAN s的报文通过并对该报文标记VLAN m’，由AC标记业务VLAN s和管理VLAN m’；由连接AP的交换机终结VLAN m；由AP接收后解CAPWAP封装并终结VLAN s，并将802.3报文转换为802.11报文发送给STA。</li></ul><p>封装后的报文在CAPWAP报文外层使用管理VLAN m，AP与AC之间的网络设备只能透传管理VLAN m，而对封装在CAPWAP报文内的业务VLAN s不能放通。</p><p>AC处于直连和旁挂位置时，封装后的数据包都需要由AC处理和转发。</p><p><img src="https://support.huawei.com/hedex/pages/EDOC1100064375AZI0130Q/03/EDOC1100064375AZI0130Q/03/resources/dc/images/fig_dc_wlan_example_000005902.png" alt></p>]]></content>
+    
+    <summary type="html">
+    
+      
+      
+        &lt;h2 id=&quot;无线WLAN隧道转发模式下数据的封装以及转发过程&quot;&gt;&lt;a href=&quot;#无线WLAN隧道转发模式下数据的封装以及转发过程&quot; class=&quot;headerlink&quot; title=&quot;无线WLAN隧道转发模式下数据的封装以及转发过程&quot;&gt;&lt;/a&gt;无线WLAN隧道转发模式下数
+      
+    
+    </summary>
+    
+      <category term="华为" scheme="http://jrblog.github.io/categories/%E5%8D%8E%E4%B8%BA/"/>
+    
+    
+      <category term="wlan" scheme="http://jrblog.github.io/tags/wlan/"/>
+    
+      <category term="华为" scheme="http://jrblog.github.io/tags/%E5%8D%8E%E4%B8%BA/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>nihaoa</title>
+    <link href="http://jrblog.github.io/2019/06/22/nihaoa/"/>
+    <id>http://jrblog.github.io/2019/06/22/nihaoa/</id>
+    <published>2019-06-22T11:44:01.000Z</published>
+    <updated>2019-06-22T11:44:01.138Z</updated>
+    
+    <summary type="html">
+    
+    </summary>
+    
+    
+  </entry>
+  
+  <entry>
+    <title>Hello World</title>
+    <link href="http://jrblog.github.io/2019/06/22/hello-world/"/>
+    <id>http://jrblog.github.io/2019/06/22/hello-world/</id>
+    <published>2019-06-22T06:34:00.005Z</published>
+    <updated>2019-06-22T06:34:00.006Z</updated>
+    
+    <content type="html"><![CDATA[<p>Welcome to <a href="https://hexo.io/" target="_blank" rel="noopener">Hexo</a>! This is your very first post. Check <a href="https://hexo.io/docs/" target="_blank" rel="noopener">documentation</a> for more info. If you get any problems when using Hexo, you can find the answer in <a href="https://hexo.io/docs/troubleshooting.html" target="_blank" rel="noopener">troubleshooting</a> or you can ask me on <a href="https://github.com/hexojs/hexo/issues" target="_blank" rel="noopener">GitHub</a>.</p><h2 id="Quick-Start"><a href="#Quick-Start" class="headerlink" title="Quick Start"></a>Quick Start</h2><h3 id="Create-a-new-post"><a href="#Create-a-new-post" class="headerlink" title="Create a new post"></a>Create a new post</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo new <span class="string">"My New Post"</span></span><br></pre></td></tr></table></figure><p>More info: <a href="https://hexo.io/docs/writing.html" target="_blank" rel="noopener">Writing</a></p><h3 id="Run-server"><a href="#Run-server" class="headerlink" title="Run server"></a>Run server</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo server</span><br></pre></td></tr></table></figure><p>More info: <a href="https://hexo.io/docs/server.html" target="_blank" rel="noopener">Server</a></p><h3 id="Generate-static-files"><a href="#Generate-static-files" class="headerlink" title="Generate static files"></a>Generate static files</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo generate</span><br></pre></td></tr></table></figure><p>More info: <a href="https://hexo.io/docs/generating.html" target="_blank" rel="noopener">Generating</a></p><h3 id="Deploy-to-remote-sites"><a href="#Deploy-to-remote-sites" class="headerlink" title="Deploy to remote sites"></a>Deploy to remote sites</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo deploy</span><br></pre></td></tr></table></figure><p>More info: <a href="https://hexo.io/docs/deployment.html" target="_blank" rel="noopener">Deployment</a></p>]]></content>
+    
+    <summary type="html">
+    
+      
+      
+        &lt;p&gt;Welcome to &lt;a href=&quot;https://hexo.io/&quot; target=&quot;_blank&quot; rel=&quot;noopener&quot;&gt;Hexo&lt;/a&gt;! This is your very first post. Check &lt;a href=&quot;https://hexo.
+      
+    
+    </summary>
+    
+    
+  </entry>
+  
+  <entry>
+    <title>aaaaa</title>
+    <link href="http://jrblog.github.io/2017/06/22/aaaaa/"/>
+    <id>http://jrblog.github.io/2017/06/22/aaaaa/</id>
+    <published>2017-06-22T08:18:11.000Z</published>
+    <updated>2019-06-22T08:22:04.796Z</updated>
+    
+    <summary type="html">
+    
+    </summary>
+    
+    
+  </entry>
+  
+</feed>
