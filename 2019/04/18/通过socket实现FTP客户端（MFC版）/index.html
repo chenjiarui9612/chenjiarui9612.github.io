@@ -1,0 +1,1327 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next gemini use-motion" lang="zh-Hans">
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="theme-color" content="#222">
+
+
+
+  
+  
+    
+    
+  <script src="/lib/pace/pace.min.js?v=1.0.2"></script>
+  <link href="/lib/pace/pace-theme-minimal.min.css?v=1.0.2" rel="stylesheet">
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css">
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="socket,c++,MFC,编程,FTP,网络协议,">
+
+
+
+
+
+  <link rel="alternate" href="/atom.xml" title="CJR的博客" type="application/atom+xml">
+
+
+
+
+
+
+<meta name="description" content="通过socket实现FTP客户端（MFC版）使用socket我们可以自己编写一个FTP的客户端。开始之前先了解FTP的两种工作模式大致的过程。 被动模式的流程被动模式下，FTP客户端使用一个非知名的随机端口N（&amp;gt;1024)去连接FTP服务器的21端口建立控制连接，然后通过控制通道发送PASV命令到服务器，服务器收到后会开启一个随机端口P（&amp;gt;1024）并开始监听，同时告诉客户端连接我的端">
+<meta name="keywords" content="socket,c++,MFC,编程,FTP,网络协议">
+<meta property="og:type" content="article">
+<meta property="og:title" content="socket实现FTP客户端">
+<meta property="og:url" content="http://jrblog.github.io/2019/04/18/通过socket实现FTP客户端（MFC版）/index.html">
+<meta property="og:site_name" content="CJR的博客">
+<meta property="og:description" content="通过socket实现FTP客户端（MFC版）使用socket我们可以自己编写一个FTP的客户端。开始之前先了解FTP的两种工作模式大致的过程。 被动模式的流程被动模式下，FTP客户端使用一个非知名的随机端口N（&amp;gt;1024)去连接FTP服务器的21端口建立控制连接，然后通过控制通道发送PASV命令到服务器，服务器收到后会开启一个随机端口P（&amp;gt;1024）并开始监听，同时告诉客户端连接我的端">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="http://jrblog.github.io/2019/04/18/通过socket实现FTP客户端（MFC版）/images/360%E6%88%AA%E5%9B%BE.jpg">
+<meta property="og:image" content="http://jrblog.github.io/home/cjr/Downloads/blog/360%E6%88%AA%E5%9B%BE.jpg">
+<meta property="og:updated_time" content="2019-06-23T06:29:51.141Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="socket实现FTP客户端">
+<meta name="twitter:description" content="通过socket实现FTP客户端（MFC版）使用socket我们可以自己编写一个FTP的客户端。开始之前先了解FTP的两种工作模式大致的过程。 被动模式的流程被动模式下，FTP客户端使用一个非知名的随机端口N（&amp;gt;1024)去连接FTP服务器的21端口建立控制连接，然后通过控制通道发送PASV命令到服务器，服务器收到后会开启一个随机端口P（&amp;gt;1024）并开始监听，同时告诉客户端连接我的端">
+<meta name="twitter:image" content="http://jrblog.github.io/2019/04/18/通过socket实现FTP客户端（MFC版）/images/360%E6%88%AA%E5%9B%BE.jpg">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Gemini',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://jrblog.github.io/2019/04/18/通过socket实现FTP客户端（MFC版）/">
+
+
+
+
+
+  <title>socket实现FTP客户端 | CJR的博客</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">CJR的博客</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br>
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br>
+            
+            关于
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br>
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br>
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br>
+            
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off" placeholder="搜索..." spellcheck="false" type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://jrblog.github.io/2019/04/18/通过socket实现FTP客户端（MFC版）/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="CJR">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/images/one.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="CJR的博客">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">socket实现FTP客户端</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2019-04-18T16:36:54+08:00">
+                2019-04-18
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/编程/" itemprop="url" rel="index">
+                    <span itemprop="name">编程</span>
+                  </a>
+                </span>
+
+                
+                
+                  ， 
+                
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/编程/网络/" itemprop="url" rel="index">
+                    <span itemprop="name">网络</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2019/04/18/通过socket实现FTP客户端（MFC版）/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count disqus-comment-count" data-disqus-identifier="2019/04/18/通过socket实现FTP客户端（MFC版）/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+            <span class="post-meta-divider">|</span>
+            <span class="page-pv"><i class="fa fa-file-o">本文总阅读数</i>
+            <span class="busuanzi-value" id="busuanzi_value_page_pv"></span>次
+            </span>
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h1 id="通过socket实现FTP客户端（MFC版）"><a href="#通过socket实现FTP客户端（MFC版）" class="headerlink" title="通过socket实现FTP客户端（MFC版）"></a>通过socket实现FTP客户端（MFC版）</h1><p>使用socket我们可以自己编写一个FTP的客户端。开始之前先了解FTP的两种工作模式大致的过程。</p>
+<h2 id="被动模式的流程"><a href="#被动模式的流程" class="headerlink" title="被动模式的流程"></a>被动模式的流程</h2><p>被动模式下，FTP客户端使用一个非知名的随机端口N（&gt;1024)去连接FTP服务器的21端口建立控制连接，然后通过控制通道发送PASV命令到服务器，服务器收到后会开启一个随机端口P（&gt;1024）并开始监听，同时告诉客户端连接我的端口P，客户端随后使用N+1端口连接服务器的端口P，建立数据连接。</p>
+<h2 id="主动模式的流程"><a href="#主动模式的流程" class="headerlink" title="主动模式的流程"></a>主动模式的流程</h2><p>主动模式下，FTP客户端使用一个非知名的随机端口N（&gt;1024)去连接FTP服务器的21端口建立控制连接，然后通过控制通道发送PORT N+1命令到服务器，同时开始监听N+1端口，服务器收到后主动使用20端口与客户端的N+1端口连接，建立数据连接。</p>
+<h2 id="客户端与服务器交互的常用命令"><a href="#客户端与服务器交互的常用命令" class="headerlink" title="客户端与服务器交互的常用命令"></a>客户端与服务器交互的常用命令</h2><p><strong>这里的命令是指底层数据包封装的命令，并不是指用户在控制台使用的与服务器交互的命令，比如dir、get、put等等。</strong></p>
+<ul>
+<li>客户端使用 USER、PASS 命令登录 FTP 服务器。</li>
+<li>客户端使用 PASV 命令告知服务器使用被动模式，获取服务器数据连接的端口号，与服务器建立数据连接。</li>
+<li>客户端使用PORT命令告知服务器使用主动模式，附带自己监听的数据端口，让服务器主动与其建立数据连接。</li>
+<li>客户端使用SIZE命令获取文件的大小。</li>
+<li>客户端使用 RETR、STOR 命令下载、上传文件。</li>
+<li>客户端使用 QUIT 命令退出连接。</li>
+</ul>
+<h2 id="使用socket实现FTP客户端"><a href="#使用socket实现FTP客户端" class="headerlink" title="使用socket实现FTP客户端"></a>使用socket实现FTP客户端</h2><h3 id="创建socket"><a href="#创建socket" class="headerlink" title="创建socket"></a>创建socket</h3>  <figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">WSADATA WSAData;</span><br><span class="line">  <span class="keyword">if</span> (WSAStartup(MAKEWORD(<span class="number">2</span>,<span class="number">2</span>),&amp;WSAData)!=<span class="number">0</span>)<span class="comment">//建立套接字绑定</span></span><br><span class="line">  &#123;</span><br><span class="line">      MessageBox(<span class="string">"初始化Winsock失败！"</span>);</span><br><span class="line">      <span class="keyword">return</span>;</span><br><span class="line">  &#125;</span><br><span class="line">  SockCtrl=socket(AF_INET,SOCK_STREAM,<span class="number">0</span>);<span class="comment">//创建连接套接字</span></span><br><span class="line">  <span class="keyword">if</span> (SockCtrl==INVALID_SOCKET)</span><br><span class="line">  &#123;</span><br><span class="line">    MessageBox(<span class="string">"创建控制Socket失败！"</span>);</span><br><span class="line">    WSACleanup();</span><br><span class="line">    <span class="keyword">return</span>;</span><br><span class="line">  &#125;</span><br></pre></td></tr></table></figure>
+
+
+<h3 id="建立控制连接"><a href="#建立控制连接" class="headerlink" title="建立控制连接"></a>建立控制连接</h3>  <figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line">nConnect=connect(SockCtrl,(sockaddr*)&amp;serveraddr,<span class="keyword">sizeof</span>(serveraddr));<span class="comment">//建立FTP控制连接</span></span><br><span class="line">  <span class="keyword">if</span> (nConnect==SOCKET_ERROR)</span><br><span class="line">  &#123;</span><br><span class="line">      MessageBox(<span class="string">"控制连接建立失败！"</span>);</span><br><span class="line">      closesocket(SockCtrl);</span><br><span class="line">      WSACleanup();</span><br><span class="line">      <span class="keyword">return</span>;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">if</span> (!RecvRespond())</span><br><span class="line">      <span class="keyword">return</span>;</span><br><span class="line">  <span class="keyword">else</span></span><br><span class="line">  &#123;<span class="comment">//判断连接应答码</span></span><br><span class="line">    <span class="keyword">if</span> (RespondCode==<span class="number">220</span>)</span><br><span class="line">    &#123;</span><br><span class="line">       m_tips+=<span class="string">"Server:  "</span>;</span><br><span class="line">       m_tips+=Respond;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">else</span></span><br><span class="line">    &#123;</span><br><span class="line">        MessageBox(<span class="string">"控制连接响应错误！"</span>);</span><br><span class="line">        closesocket(SockCtrl);</span><br><span class="line">        WSACleanup();</span><br><span class="line">        <span class="keyword">return</span>;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br></pre></td></tr></table></figure>
+
+
+<h3 id="定义SendCommand函数，用于客户端发送命令"><a href="#定义SendCommand函数，用于客户端发送命令" class="headerlink" title="定义SendCommand函数，用于客户端发送命令"></a>定义SendCommand函数，用于客户端发送命令</h3>  <figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//发送命令</span></span><br><span class="line"><span class="keyword">bool</span> CFtpClientDlg::SendCommand(<span class="keyword">void</span>)</span><br><span class="line">&#123;</span><br><span class="line">   <span class="keyword">int</span> nSend;</span><br><span class="line"> nSend=send(SockCtrl,Command,<span class="built_in">strlen</span>(Command),<span class="number">0</span>);</span><br><span class="line"> <span class="keyword">if</span> (nSend==SOCKET_ERROR)</span><br><span class="line"> &#123;</span><br><span class="line">    MessageBox(<span class="string">"Socket发送失败！"</span>);</span><br><span class="line">    closesocket(SockCtrl);</span><br><span class="line">    WSACleanup();</span><br><span class="line">    <span class="keyword">return</span> <span class="literal">false</span>;</span><br><span class="line"> &#125;</span><br><span class="line"></span><br><span class="line"> <span class="keyword">return</span> <span class="literal">true</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+<h3 id="定义RecvRespond函数，用于客户端接收响应码"><a href="#定义RecvRespond函数，用于客户端接收响应码" class="headerlink" title="定义RecvRespond函数，用于客户端接收响应码"></a>定义RecvRespond函数，用于客户端接收响应码</h3>  <figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//接收响应码</span></span><br><span class="line"><span class="keyword">bool</span> CFtpClientDlg::RecvRespond(<span class="keyword">void</span>)</span><br><span class="line">&#123;</span><br><span class="line">      <span class="keyword">int</span> nRecv;</span><br><span class="line">  <span class="built_in">memset</span>(Respond,<span class="number">0</span>,MAX_SIZE);</span><br><span class="line">  nRecv=recv(SockCtrl,Respond,MAX_SIZE,<span class="number">0</span>);<span class="comment">//通过连接接收响应</span></span><br><span class="line">  <span class="keyword">if</span> (nRecv==SOCKET_ERROR)</span><br><span class="line">  &#123;</span><br><span class="line">     MessageBox(<span class="string">"Socket接收失败！"</span>);</span><br><span class="line">     closesocket(SockCtrl);</span><br><span class="line">     WSACleanup();</span><br><span class="line">     <span class="keyword">return</span> <span class="literal">false</span>;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="comment">//从响应中解析响应码</span></span><br><span class="line">  <span class="keyword">char</span>* ReplyCodes=<span class="keyword">new</span> <span class="keyword">char</span>[<span class="number">3</span>];</span><br><span class="line">  <span class="built_in">memset</span>(ReplyCodes,<span class="number">0</span>,<span class="number">3</span>);</span><br><span class="line">  <span class="built_in">memcpy</span>(ReplyCodes,Respond,<span class="number">3</span>);</span><br><span class="line">  RespondCode=atoi(ReplyCodes);</span><br><span class="line">  <span class="keyword">return</span> <span class="literal">true</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+<h3 id="验证用户名、口令"><a href="#验证用户名、口令" class="headerlink" title="验证用户名、口令"></a>验证用户名、口令</h3>  <figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">sprintf</span>(Command,<span class="string">"USER %s\r\n"</span>,m_user); <span class="comment">//Command为事先定义的缓冲区</span></span><br><span class="line">    <span class="keyword">if</span> (!SendCommand())</span><br><span class="line">      <span class="keyword">return</span>;</span><br><span class="line"></span><br><span class="line">  m_tips+=<span class="string">"Client:  "</span>;<span class="comment">//m_tips为编辑框控件变量，用于显示交互过程</span></span><br><span class="line">  m_tips+=Command;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">if</span> (!RecvRespond())</span><br><span class="line">      <span class="keyword">return</span>;</span><br><span class="line">  <span class="keyword">else</span></span><br><span class="line">  &#123;<span class="comment">//判断USER应答码</span></span><br><span class="line">     <span class="keyword">if</span> (RespondCode==<span class="number">220</span> || RespondCode==<span class="number">331</span>)</span><br><span class="line">     &#123;</span><br><span class="line">        m_tips+=<span class="string">"Server: "</span>;</span><br><span class="line">        m_tips+=Respond;</span><br><span class="line">     &#125;</span><br><span class="line">     <span class="keyword">else</span></span><br><span class="line">     &#123;</span><br><span class="line">        MessageBox(<span class="string">"USER响应错误！"</span>);</span><br><span class="line">        closesocket(SockCtrl);</span><br><span class="line">        WSACleanup();</span><br><span class="line">        <span class="keyword">return</span>;</span><br><span class="line">     &#125;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">if</span> (RespondCode==<span class="number">331</span>)<span class="comment">//User name okay,need password</span></span><br><span class="line">  &#123; <span class="comment">//合成PASS命令</span></span><br><span class="line">      <span class="built_in">memset</span>(Command,<span class="number">0</span>,MAX_SIZE);</span><br><span class="line">      <span class="built_in">sprintf</span>(Command,<span class="string">"PASS %s\r\n"</span>,m_pwd);</span><br><span class="line">      <span class="keyword">if</span> (!SendCommand())</span><br><span class="line">          <span class="keyword">return</span>;</span><br><span class="line">      m_tips+=<span class="string">"Client: PASS ******\r\n"</span>;</span><br><span class="line">      <span class="keyword">if</span> (!RecvRespond())</span><br><span class="line">          <span class="keyword">return</span>;</span><br><span class="line">      <span class="keyword">else</span></span><br><span class="line">      &#123;<span class="comment">//判断PASS响应码</span></span><br><span class="line">          <span class="keyword">if</span> (RespondCode==<span class="number">230</span>)</span><br><span class="line">          &#123;</span><br><span class="line">             m_tips+=<span class="string">"Server: "</span>;</span><br><span class="line">             m_tips+=Respond;</span><br><span class="line">             m_CONNECT.EnableWindow(FALSE);</span><br><span class="line">             m_QUIT.EnableWindow(TRUE);</span><br><span class="line">             m_LIST.EnableWindow(TRUE);</span><br><span class="line">          &#125;</span><br><span class="line">          <span class="keyword">else</span></span><br><span class="line">          &#123;</span><br><span class="line">             MessageBox(<span class="string">"PASS响应错误！"</span>);</span><br><span class="line">             closesocket(SockCtrl);</span><br><span class="line">             WSACleanup();</span><br><span class="line">             <span class="keyword">return</span>;</span><br><span class="line">          &#125;</span><br><span class="line">        &#125;</span><br></pre></td></tr></table></figure>
+
+
+<h3 id="被动模式"><a href="#被动模式" class="headerlink" title="被动模式"></a>被动模式</h3>  <figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">bool</span> CFtpClientDlg::Pasv()</span><br><span class="line">&#123;</span><br><span class="line">  UpdateData(TRUE);</span><br><span class="line">   <span class="built_in">memset</span>(Command,<span class="number">0</span>,MAX_SIZE);</span><br><span class="line"> <span class="comment">//合成PASV命令</span></span><br><span class="line">   <span class="built_in">sprintf</span>(Command,<span class="string">"PASV \r\n"</span>);</span><br><span class="line"> <span class="keyword">if</span> (!SendCommand())</span><br><span class="line">     <span class="keyword">return</span> <span class="literal">false</span>;</span><br><span class="line">  m_tips+=<span class="string">"Client: "</span>;</span><br><span class="line">  m_tips+=Command;</span><br><span class="line"> <span class="keyword">if</span> (!RecvRespond())</span><br><span class="line">     <span class="keyword">return</span> <span class="literal">false</span>;</span><br><span class="line"> <span class="keyword">else</span></span><br><span class="line"> &#123;</span><br><span class="line">    <span class="comment">//判断PASV响应码</span></span><br><span class="line">     <span class="keyword">if</span> (RespondCode!=<span class="number">227</span>)</span><br><span class="line">     &#123;</span><br><span class="line">       MessageBox(<span class="string">"PASV响应错误！"</span>);</span><br><span class="line">       closesocket(SockCtrl);</span><br><span class="line">       WSACleanup();</span><br><span class="line">       <span class="keyword">return</span> <span class="literal">false</span>;</span><br><span class="line">     &#125;</span><br><span class="line">      m_tips+=<span class="string">"Server: "</span>;</span><br><span class="line">      m_tips+=Respond;</span><br><span class="line"> &#125;</span><br><span class="line"> <span class="keyword">char</span>* part[<span class="number">6</span>];</span><br><span class="line"> <span class="comment">//分离PASV应答信息</span></span><br><span class="line"><span class="keyword">if</span> (strtok(Respond,<span class="string">"("</span>))</span><br><span class="line">   &#123;</span><br><span class="line">     <span class="keyword">for</span> (<span class="keyword">int</span> i=<span class="number">0</span>;i&lt;<span class="number">5</span>;i++)</span><br><span class="line">     &#123;</span><br><span class="line">        part[i]=strtok(<span class="literal">NULL</span>,<span class="string">","</span>);</span><br><span class="line">        <span class="keyword">if</span> (!part[i])</span><br><span class="line">            <span class="keyword">return</span> <span class="literal">false</span>;</span><br><span class="line">     &#125;</span><br><span class="line">     part[<span class="number">5</span>]=strtok(<span class="literal">NULL</span>,<span class="string">")"</span>);      </span><br><span class="line">     <span class="keyword">if</span> (!part[<span class="number">5</span>])</span><br><span class="line">         <span class="keyword">return</span> <span class="literal">false</span>;</span><br><span class="line">   &#125;</span><br><span class="line">  <span class="keyword">else</span></span><br><span class="line">      <span class="keyword">return</span> <span class="literal">false</span>;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">unsigned</span> <span class="keyword">short</span> ServerPort;   <span class="comment">//获取服务器数据端口</span></span><br><span class="line">  ServerPort=<span class="keyword">unsigned</span> <span class="keyword">short</span>((atoi(part[<span class="number">4</span>])&lt;&lt;<span class="number">8</span>)+atoi(part[<span class="number">5</span>]));</span><br><span class="line">  SockDataTongxin=socket(AF_INET,SOCK_STREAM,<span class="number">0</span>);</span><br><span class="line">  <span class="keyword">if</span> (SockDataTongxin==INVALID_SOCKET)</span><br><span class="line">  &#123;</span><br><span class="line">    MessageBox(<span class="string">"创建数据Socket失败！"</span>);</span><br><span class="line">    closesocket(SockCtrl);</span><br><span class="line">    WSACleanup();</span><br><span class="line">    <span class="keyword">return</span> <span class="literal">false</span>;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  sockaddr_in serveraddr2;</span><br><span class="line">  serveraddr2.sin_family=AF_INET;</span><br><span class="line">  serveraddr2.sin_addr.S_un.S_addr=inet_addr(m_addr);</span><br><span class="line">  serveraddr2.sin_port=htons(ServerPort);</span><br><span class="line"></span><br><span class="line">  <span class="keyword">int</span> nConnect=connect(SockDataTongxin,(sockaddr*)&amp;serveraddr2,<span class="keyword">sizeof</span>(serveraddr2));</span><br><span class="line">  <span class="keyword">if</span> (nConnect==SOCKET_ERROR)</span><br><span class="line">  &#123;</span><br><span class="line">    MessageBox(<span class="string">"数据连接失败！"</span>);</span><br><span class="line">    closesocket(SockCtrl);</span><br><span class="line">    closesocket(SockDataTongxin);</span><br><span class="line">    WSACleanup();</span><br><span class="line">    <span class="keyword">return</span> <span class="literal">false</span>;</span><br><span class="line">  &#125;</span><br><span class="line">  UpdateData(FALSE);</span><br><span class="line">  <span class="keyword">return</span> <span class="literal">true</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+<h3 id="主动模式"><a href="#主动模式" class="headerlink" title="主动模式"></a>主动模式</h3><p>  <strong>注意：客户端指明要使用主动模式时，只有在有上传、下载请求发生时服务器才会主动与客户端建立数据连接（被动模式可以是客户端事先与服务器建立数据连接后再有上传下载的请求），所以主动模式下客户端的端口监听事件应该在发生了数据传输的请求之后。</strong></p>
+  <figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">bool</span> CFtpClientDlg::Port()</span><br><span class="line">&#123;</span><br><span class="line">  UpdateData(TRUE);</span><br><span class="line">  dataport+=<span class="number">1</span>;<span class="comment">//主动模式下，每建立一次数据连接，端口号都是在之前基础上+1</span></span><br><span class="line">  SockData=socket(AF_INET,SOCK_STREAM,<span class="number">0</span>);</span><br><span class="line">  <span class="keyword">if</span> (SockData==INVALID_SOCKET)</span><br><span class="line">  &#123;</span><br><span class="line">    MessageBox(<span class="string">"创建数据Socket失败！"</span>);</span><br><span class="line">    closesocket(SockCtrl);</span><br><span class="line">    WSACleanup();</span><br><span class="line">    <span class="keyword">return</span> <span class="literal">false</span>;</span><br><span class="line">  &#125;</span><br><span class="line">  sockaddr_in localaddr;</span><br><span class="line">  <span class="keyword">int</span> len=<span class="keyword">sizeof</span>(localaddr);</span><br><span class="line">  <span class="keyword">int</span> ret = getsockname(SockCtrl,(sockaddr*)&amp;localaddr,&amp;len);<span class="comment">//获取SockCtrl地址信息</span></span><br><span class="line">  <span class="keyword">if</span>(ret!=<span class="number">0</span>)</span><br><span class="line">  &#123;</span><br><span class="line">      <span class="built_in">printf</span>(<span class="string">"getsockname失败！"</span>);</span><br><span class="line">      <span class="keyword">return</span> <span class="literal">false</span>;</span><br><span class="line">  &#125;</span><br><span class="line">  localport=ntohs(localaddr.sin_port)+dataport;<span class="comment">//获取本地随机端口+1</span></span><br><span class="line">  localaddr.sin_family=AF_INET;</span><br><span class="line">  localaddr.sin_port=htons(localport);</span><br><span class="line">  <span class="comment">//localaddr.sin_addr.S_un.S_addr=htonl(INADDR_ANY);</span></span><br><span class="line">   ret =bind(SockData,(sockaddr*)&amp;localaddr,len);</span><br><span class="line">  <span class="keyword">if</span> (ret==SOCKET_ERROR)</span><br><span class="line">  &#123;</span><br><span class="line">    MessageBox(<span class="string">"bind失败！"</span>);</span><br><span class="line">    closesocket(SockCtrl);</span><br><span class="line">    closesocket(SockData);</span><br><span class="line">    WSACleanup();</span><br><span class="line">    <span class="keyword">return</span> <span class="literal">false</span>;</span><br><span class="line">  &#125;</span><br><span class="line">  ret =listen(SockData,<span class="number">64</span>);</span><br><span class="line">  <span class="keyword">if</span> (ret==SOCKET_ERROR)</span><br><span class="line">  &#123;</span><br><span class="line">    MessageBox(<span class="string">"listen失败！"</span>);</span><br><span class="line">    closesocket(SockCtrl);</span><br><span class="line">    closesocket(SockData);</span><br><span class="line">    WSACleanup();</span><br><span class="line">    <span class="keyword">return</span> <span class="literal">false</span>;</span><br><span class="line">  &#125;    </span><br><span class="line">  <span class="comment">//inet_ntoa(localaddr.sin_addr);</span></span><br><span class="line">   <span class="built_in">memset</span>(Command,<span class="number">0</span>,MAX_SIZE);</span><br><span class="line"> <span class="comment">//合成PORT命令</span></span><br><span class="line">   <span class="comment">//itoa(localaddr.sin_addr,buf,10);</span></span><br><span class="line">   <span class="keyword">char</span>* part[<span class="number">6</span>];</span><br><span class="line">   <span class="keyword">char</span> buf1[<span class="number">5</span>];</span><br><span class="line">   <span class="keyword">char</span> buf2[<span class="number">5</span>];</span><br><span class="line">   part[<span class="number">0</span>]=strtok(inet_ntoa(localaddr.sin_addr),<span class="string">"."</span>);</span><br><span class="line">   part[<span class="number">1</span>]=strtok(<span class="literal">NULL</span>,<span class="string">"."</span>);</span><br><span class="line">   part[<span class="number">2</span>]=strtok(<span class="literal">NULL</span>,<span class="string">"."</span>);</span><br><span class="line">   part[<span class="number">3</span>]=strtok(<span class="literal">NULL</span>,<span class="string">"."</span>);</span><br><span class="line">   part[<span class="number">4</span>]=itoa(localport/<span class="number">256</span>,buf1,<span class="number">10</span>);</span><br><span class="line">   part[<span class="number">5</span>]=itoa(localport%<span class="number">256</span>,buf2,<span class="number">10</span>);</span><br><span class="line">   <span class="built_in">sprintf</span>(Command,<span class="string">"PORT %s,%s,%s,%s,%s,%s\r\n"</span>,part[<span class="number">0</span>],part[<span class="number">1</span>],part[<span class="number">2</span>],part[<span class="number">3</span>],part[<span class="number">4</span>],part[<span class="number">5</span>]);</span><br><span class="line">     <span class="keyword">if</span> (!SendCommand())</span><br><span class="line">         <span class="keyword">return</span> <span class="literal">false</span>;</span><br><span class="line">      m_tips+=<span class="string">"Client:  "</span>;;</span><br><span class="line">      m_tips+=Command;</span><br><span class="line"></span><br><span class="line">     <span class="keyword">if</span> (!RecvRespond())</span><br><span class="line">         <span class="keyword">return</span> <span class="literal">false</span>;</span><br><span class="line">     <span class="keyword">else</span></span><br><span class="line">     &#123;</span><br><span class="line">        <span class="comment">//判断PORT响应码</span></span><br><span class="line">         <span class="keyword">if</span> (RespondCode==<span class="number">200</span>)</span><br><span class="line">         &#123;</span><br><span class="line">               m_tips+=<span class="string">"Server: "</span>;</span><br><span class="line">              m_tips+=Respond;</span><br><span class="line">              UpdateData(FALSE);</span><br><span class="line">              <span class="keyword">return</span> <span class="literal">true</span>;</span><br><span class="line">         &#125;<span class="keyword">else</span></span><br><span class="line">         &#123;</span><br><span class="line">           MessageBox(<span class="string">"PORT响应错误！"</span>);</span><br><span class="line">           closesocket(SockCtrl);</span><br><span class="line">           WSACleanup();</span><br><span class="line">           <span class="keyword">return</span> <span class="literal">false</span>;</span><br><span class="line">         &#125;</span><br><span class="line">      &#125;</span><br><span class="line">     UpdateData(FALSE);</span><br><span class="line">      <span class="keyword">return</span> <span class="literal">true</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+<h3 id="被动模式下载文件"><a href="#被动模式下载文件" class="headerlink" title="被动模式下载文件"></a>被动模式下载文件</h3>  <figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span>(!Pasv())</span><br><span class="line">      <span class="keyword">return</span>;</span><br><span class="line">      UpdateData(TRUE);    </span><br><span class="line">      <span class="built_in">memset</span>(Command,<span class="number">0</span>,MAX_SIZE);</span><br><span class="line">      <span class="built_in">sprintf</span>(Command,<span class="string">"SIZE %s\r\n"</span>,m_filename);</span><br><span class="line">      <span class="keyword">if</span> (!SendCommand())</span><br><span class="line">          <span class="keyword">return</span>;</span><br><span class="line">      m_tips+=<span class="string">"Client: "</span>;</span><br><span class="line">      m_tips+=Command;</span><br><span class="line">      <span class="keyword">if</span> (!RecvRespond())<span class="comment">//接收响应</span></span><br><span class="line">      <span class="keyword">return</span>;</span><br><span class="line">      <span class="keyword">else</span></span><br><span class="line">      &#123;</span><br><span class="line">          m_tips+=<span class="string">"Server: "</span>;</span><br><span class="line">          m_tips+=Respond;</span><br><span class="line">          strtok(Respond,<span class="string">" "</span>);</span><br><span class="line">          <span class="keyword">char</span> *str;</span><br><span class="line">          str=strtok(<span class="literal">NULL</span>,<span class="string">"\r\n"</span>);</span><br><span class="line">          size=atoi(str);<span class="comment">//获取文件长度</span></span><br><span class="line">          <span class="keyword">if</span> (RespondCode!=<span class="number">213</span>)</span><br><span class="line">          &#123;</span><br><span class="line">              UpdateData(FALSE);</span><br><span class="line">              m_TIPSCTRL.LineScroll(m_TIPSCTRL.GetLineCount());<span class="comment">//滚动条置底</span></span><br><span class="line">              closesocket(SockDataTongxin);</span><br><span class="line">              <span class="keyword">return</span>;</span><br><span class="line">          &#125;</span><br><span class="line">      &#125;</span><br><span class="line">      <span class="built_in">memset</span>(Command,<span class="number">0</span>,MAX_SIZE);</span><br><span class="line">      <span class="built_in">sprintf</span>(Command,<span class="string">"RETR %s\r\n"</span>,m_filename);</span><br><span class="line">      <span class="keyword">if</span> (!SendCommand())</span><br><span class="line">          <span class="keyword">return</span>;</span><br><span class="line">      m_tips+=<span class="string">"Client: "</span>;</span><br><span class="line">      m_tips+=Command;</span><br><span class="line">      <span class="keyword">if</span> (!RecvRespond())<span class="comment">//接收响应</span></span><br><span class="line">          <span class="keyword">return</span>;</span><br><span class="line">      <span class="keyword">else</span></span><br><span class="line">      &#123;</span><br><span class="line">          m_tips+=<span class="string">"Server: "</span>;</span><br><span class="line">          m_tips+=Respond;</span><br><span class="line">          <span class="keyword">if</span> (RespondCode!=<span class="number">150</span>)</span><br><span class="line">          &#123;</span><br><span class="line">              UpdateData(FALSE);    </span><br><span class="line">              m_TIPSCTRL.LineScroll(m_TIPSCTRL.GetLineCount());<span class="comment">//滚动条置底</span></span><br><span class="line">             closesocket(SockDataTongxin);</span><br><span class="line">              <span class="keyword">return</span>;</span><br><span class="line">          &#125;</span><br><span class="line">      &#125;</span><br></pre></td></tr></table></figure>
+
+
+<h3 id="主动模式下载文件"><a href="#主动模式下载文件" class="headerlink" title="主动模式下载文件"></a>主动模式下载文件</h3>  <figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br></pre></td><td class="code"><pre><span class="line">dataport+=<span class="number">1</span>;<span class="comment">//主动模式下，每建立一次数据连接，端口号都是在之前基础上+1</span></span><br><span class="line"><span class="keyword">if</span>(!Port())</span><br><span class="line"><span class="keyword">return</span>;</span><br><span class="line">UpdateData(TRUE);    </span><br><span class="line"><span class="built_in">memset</span>(Command,<span class="number">0</span>,MAX_SIZE);</span><br><span class="line"><span class="built_in">sprintf</span>(Command,<span class="string">"SIZE %s\r\n"</span>,m_filename);</span><br><span class="line"><span class="keyword">if</span> (!SendCommand())</span><br><span class="line">    <span class="keyword">return</span>;</span><br><span class="line">m_tips+=<span class="string">"Client: "</span>;</span><br><span class="line">m_tips+=Command;</span><br><span class="line"><span class="keyword">if</span> (!RecvRespond())<span class="comment">//接收响应</span></span><br><span class="line">    <span class="keyword">return</span>;</span><br><span class="line"><span class="keyword">else</span></span><br><span class="line">&#123;</span><br><span class="line">     m_tips+=<span class="string">"Server: "</span>;</span><br><span class="line">     m_tips+=Respond;</span><br><span class="line">  </span><br><span class="line">    <span class="keyword">if</span> (RespondCode!=<span class="number">213</span>)</span><br><span class="line">    &#123;</span><br><span class="line">        UpdateData(FALSE);    </span><br><span class="line">        m_TIPSCTRL.LineScroll(m_TIPSCTRL.GetLineCount());<span class="comment">//滚动条置底</span></span><br><span class="line">      closesocket(SockDataTongxin);</span><br><span class="line">       <span class="keyword">return</span>;      </span><br><span class="line">    &#125;</span><br><span class="line">  </span><br><span class="line">&#125;</span><br><span class="line">strtok(Respond,<span class="string">" "</span>);</span><br><span class="line"><span class="keyword">char</span> *str;</span><br><span class="line">str=strtok(<span class="literal">NULL</span>,<span class="string">"\r\n"</span>);</span><br><span class="line">size=atoi(str);<span class="comment">//获取文件长度</span></span><br><span class="line"><span class="built_in">memset</span>(Command,<span class="number">0</span>,MAX_SIZE);</span><br><span class="line"><span class="built_in">sprintf</span>(Command,<span class="string">"RETR %s\r\n"</span>,m_filename);</span><br><span class="line"><span class="keyword">if</span> (!SendCommand())</span><br><span class="line">    <span class="keyword">return</span>;</span><br><span class="line">m_tips+=<span class="string">"Client: "</span>;</span><br><span class="line">m_tips+=Command;        </span><br><span class="line"><span class="comment">//accept()在数据传输请求之后</span></span><br><span class="line">SockDataTongxin = accept(SockData,<span class="literal">NULL</span>,<span class="literal">NULL</span>);</span><br><span class="line"><span class="keyword">if</span> (SockDataTongxin==INVALID_SOCKET)</span><br><span class="line">&#123;</span><br><span class="line">  MessageBox(<span class="string">"accept失败！"</span>);</span><br><span class="line">  <span class="comment">//closesocket(SockCtrl);</span></span><br><span class="line">  closesocket(SockData);</span><br><span class="line">  <span class="keyword">return</span> ;</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">if</span> (!RecvRespond())<span class="comment">//接收响应</span></span><br><span class="line">    <span class="keyword">return</span>;</span><br><span class="line"><span class="keyword">else</span></span><br><span class="line">&#123;</span><br><span class="line">    m_tips+=<span class="string">"Server: "</span>;</span><br><span class="line">    m_tips+=Respond;        </span><br><span class="line">    <span class="keyword">if</span> (RespondCode!=<span class="number">150</span>)</span><br><span class="line">    &#123;</span><br><span class="line">        UpdateData(FALSE);</span><br><span class="line">        m_TIPSCTRL.LineScroll(m_TIPSCTRL.GetLineCount());<span class="comment">//滚动条置底</span></span><br><span class="line">        closesocket(SockDataTongxin);</span><br><span class="line">       <span class="keyword">return</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+<h3 id="被动模式上传文件"><a href="#被动模式上传文件" class="headerlink" title="被动模式上传文件"></a>被动模式上传文件</h3>  <figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span>(!Pasv())</span><br><span class="line">      <span class="keyword">return</span>;</span><br><span class="line">      <span class="built_in">memset</span>(Command,<span class="number">0</span>,MAX_SIZE);</span><br><span class="line">      <span class="built_in">sprintf</span>(Command,<span class="string">"STOR %s\r\n"</span>,uploadfile);<span class="comment">//uploadfile为事先定义的文件路径名变量</span></span><br><span class="line">      <span class="keyword">if</span> (!SendCommand())</span><br><span class="line">          <span class="keyword">return</span>;</span><br><span class="line">      m_tips+=<span class="string">"Client: "</span>;</span><br><span class="line">      m_tips+=Command;</span><br><span class="line">      <span class="keyword">if</span> (!RecvRespond())<span class="comment">//接收响应</span></span><br><span class="line">          <span class="keyword">return</span>;</span><br><span class="line">      <span class="keyword">else</span></span><br><span class="line">      &#123; </span><br><span class="line">          m_tips+=<span class="string">"Server: "</span>;</span><br><span class="line">          m_tips+=Respond;</span><br><span class="line">          <span class="keyword">if</span> (RespondCode!=<span class="number">150</span>)</span><br><span class="line">          &#123;</span><br><span class="line">           <span class="comment">//MessageBox("STOR响应错误！");</span></span><br><span class="line">              UpdateData(FALSE);</span><br><span class="line">              m_TIPSCTRL.LineScroll(m_TIPSCTRL.GetLineCount());<span class="comment">//滚动条置底    </span></span><br><span class="line">             closesocket(SockDataTongxin);</span><br><span class="line">             <span class="keyword">return</span>;</span><br><span class="line">          &#125;</span><br><span class="line">      &#125;    </span><br><span class="line">      UpdateData(FALSE);</span><br><span class="line">      FILE *fp=fopen(m_path,<span class="string">"rb"</span>);</span><br><span class="line">      fseek(fp,<span class="number">0</span>,SEEK_SET);</span><br><span class="line">      fseek(fp,<span class="number">0</span>,SEEK_END);</span><br><span class="line">       <span class="keyword">long</span> length = ftell(fp);<span class="comment">//获取文件长度</span></span><br><span class="line">      fseek(fp,<span class="number">0</span>,SEEK_SET);<span class="comment">//文件指针指回文件头</span></span><br><span class="line">      <span class="comment">//char *Buf=new char(length);;</span></span><br><span class="line">      <span class="keyword">char</span> *Buf=<span class="keyword">new</span> <span class="keyword">char</span>[length];</span><br><span class="line">      fread(Buf,length,<span class="number">1</span>,fp);</span><br><span class="line">      fclose(fp);</span><br><span class="line">      <span class="keyword">int</span> ret=send(SockDataTongxin,Buf,length,<span class="number">0</span>);</span><br><span class="line">      <span class="keyword">if</span>(ret==SOCKET_ERROR)</span><br><span class="line">      &#123;</span><br><span class="line">          MessageBox(<span class="string">"上传文件失败！"</span>);</span><br><span class="line">      &#125;</span><br><span class="line">      closesocket(SockDataTongxin);    </span><br><span class="line">      <span class="keyword">if</span> (!RecvRespond())<span class="comment">//接收响应</span></span><br><span class="line">          <span class="keyword">return</span>;</span><br><span class="line">      <span class="keyword">else</span></span><br><span class="line">      &#123; </span><br><span class="line">          m_tips+=<span class="string">"Server: "</span>;</span><br><span class="line">          m_tips+=Respond;</span><br><span class="line">          <span class="keyword">if</span> (RespondCode!=<span class="number">226</span>)</span><br><span class="line">          &#123;</span><br><span class="line">              UpdateData(FALSE);</span><br><span class="line">              m_TIPSCTRL.LineScroll(m_TIPSCTRL.GetLineCount());<span class="comment">//滚动条置底    </span></span><br><span class="line">             closesocket(SockDataTongxin);</span><br><span class="line">             <span class="keyword">return</span>;</span><br><span class="line">          &#125;</span><br><span class="line">      &#125;</span><br></pre></td></tr></table></figure>
+
+
+<h3 id="主动模式上传文件"><a href="#主动模式上传文件" class="headerlink" title="主动模式上传文件"></a>主动模式上传文件</h3>  <figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br></pre></td><td class="code"><pre><span class="line">dataport+=<span class="number">1</span>;<span class="comment">//主动模式下，每建立一次数据连接，端口号都是在之前基础上+1</span></span><br><span class="line"><span class="keyword">if</span>(!Port())</span><br><span class="line"><span class="keyword">return</span>;</span><br><span class="line"><span class="built_in">memset</span>(Command,<span class="number">0</span>,MAX_SIZE);</span><br><span class="line"><span class="built_in">sprintf</span>(Command,<span class="string">"STOR %s\r\n"</span>,uploadfile);</span><br><span class="line"><span class="keyword">if</span> (!SendCommand())</span><br><span class="line">    <span class="keyword">return</span>;</span><br><span class="line">m_tips+=<span class="string">"Client: "</span>;</span><br><span class="line">m_tips+=Command;</span><br><span class="line"><span class="comment">//accept()在数据传输请求之后</span></span><br><span class="line">SockDataTongxin = accept(SockData,<span class="literal">NULL</span>,<span class="literal">NULL</span>);</span><br><span class="line"><span class="keyword">if</span> (SockDataTongxin==INVALID_SOCKET)</span><br><span class="line">&#123;</span><br><span class="line">  MessageBox(<span class="string">"accept失败！"</span>);</span><br><span class="line">  closesocket(SockData);</span><br><span class="line">  <span class="keyword">return</span> ;</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">if</span> (!RecvRespond())<span class="comment">//接收响应</span></span><br><span class="line">    <span class="keyword">return</span>;</span><br><span class="line"><span class="keyword">else</span></span><br><span class="line">&#123; </span><br><span class="line">    m_tips+=<span class="string">"Server: "</span>;</span><br><span class="line">    m_tips+=Respond;</span><br><span class="line">    <span class="keyword">if</span> (RespondCode!=<span class="number">150</span>)</span><br><span class="line">    &#123;</span><br><span class="line">     <span class="comment">//MessageBox("STOR响应错误！");</span></span><br><span class="line">        UpdateData(FALSE);</span><br><span class="line">        m_TIPSCTRL.LineScroll(m_TIPSCTRL.GetLineCount());<span class="comment">//滚动条置底    </span></span><br><span class="line">       closesocket(SockDataTongxin);</span><br><span class="line">       <span class="keyword">return</span>;</span><br><span class="line">    &#125;</span><br><span class="line"> &#125;    </span><br><span class="line">FILE *fp1=fopen(m_path,<span class="string">"rb"</span>);</span><br><span class="line">fseek(fp1,<span class="number">0</span>,SEEK_SET);</span><br><span class="line">fseek(fp1,<span class="number">0</span>,SEEK_END);</span><br><span class="line"> <span class="keyword">long</span> length = ftell(fp1);<span class="comment">//获取文件长度</span></span><br><span class="line">fseek(fp1,<span class="number">0</span>,SEEK_SET);<span class="comment">//文件指针指回文件头</span></span><br><span class="line"><span class="keyword">char</span> *Buf=<span class="keyword">new</span> <span class="keyword">char</span>[length];</span><br><span class="line">fread(Buf,length,<span class="number">1</span>,fp1);</span><br><span class="line">fclose(fp1);</span><br><span class="line"><span class="keyword">int</span> ret=send(SockDataTongxin,Buf,length,<span class="number">0</span>);</span><br><span class="line"><span class="keyword">if</span>(ret==SOCKET_ERROR)</span><br><span class="line">&#123;</span><br><span class="line">    MessageBox(<span class="string">"上传文件失败！"</span>);</span><br><span class="line">&#125;</span><br><span class="line">closesocket(SockDataTongxin);</span><br><span class="line"><span class="keyword">if</span> (!RecvRespond())<span class="comment">//接收响应</span></span><br><span class="line">    <span class="keyword">return</span>;</span><br><span class="line"><span class="keyword">else</span></span><br><span class="line">&#123; </span><br><span class="line">    m_tips+=<span class="string">"Server: "</span>;</span><br><span class="line">    m_tips+=Respond;</span><br><span class="line">    <span class="keyword">if</span> (RespondCode!=<span class="number">150</span>)</span><br><span class="line">    &#123;</span><br><span class="line">        UpdateData(FALSE);</span><br><span class="line">        m_TIPSCTRL.LineScroll(m_TIPSCTRL.GetLineCount());<span class="comment">//滚动条置底    </span></span><br><span class="line">       closesocket(SockDataTongxin);</span><br><span class="line">       <span class="keyword">return</span>;</span><br><span class="line">    &#125;</span><br><span class="line"> &#125;</span><br></pre></td></tr></table></figure>
+
+
+<h3 id="与服务器断开连接"><a href="#与服务器断开连接" class="headerlink" title="与服务器断开连接"></a>与服务器断开连接</h3><p>  <strong>这里断开的是控制连接，数据连接则是每一次数据传输时建立，传输结束时就断开的。</strong></p>
+  <figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br></pre></td><td class="code"><pre><span class="line">svoid CFtpClientDlg::OnBnClickedQuit()</span><br><span class="line">&#123;</span><br><span class="line">  <span class="comment">// <span class="doctag">TODO:</span> 在此添加控件通知处理程序代码</span></span><br><span class="line">  <span class="built_in">memset</span>(Command,<span class="number">0</span>,MAX_SIZE);</span><br><span class="line">  <span class="comment">//合成QUIT命令</span></span><br><span class="line">  <span class="built_in">sprintf</span>(Command,<span class="string">"QUIT\r\n"</span>);</span><br><span class="line">  <span class="keyword">if</span> (!SendCommand())</span><br><span class="line">      <span class="keyword">return</span>;</span><br><span class="line">  m_tips+=<span class="string">"Client: "</span>;</span><br><span class="line">  m_tips+=Command;</span><br><span class="line">  <span class="keyword">if</span> (!RecvRespond())</span><br><span class="line">      <span class="keyword">return</span>;</span><br><span class="line">  <span class="keyword">else</span></span><br><span class="line">  &#123;</span><br><span class="line">    <span class="keyword">if</span> (RespondCode==<span class="number">221</span>)</span><br><span class="line">    &#123;</span><br><span class="line">       m_tips+=<span class="string">"Server: "</span>;</span><br><span class="line">       m_tips+=Respond;</span><br><span class="line">       m_direc=<span class="string">""</span>;</span><br><span class="line">       m_CONNECT.EnableWindow(TRUE);</span><br><span class="line">      m_QUIT.EnableWindow(FALSE);</span><br><span class="line">      m_LIST.EnableWindow(FALSE);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">else</span></span><br><span class="line">    &#123;</span><br><span class="line">      m_tips+=<span class="string">"Server: "</span>;</span><br><span class="line">       m_tips+=Respond;</span><br><span class="line">       m_direc=<span class="string">""</span>;MessageBox(<span class="string">"QUIT响应错误！"</span>);</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">  UpdateData(FALSE);</span><br><span class="line">  closesocket(SockCtrl);</span><br><span class="line">  WSACleanup();</span><br><span class="line">  m_TIPSCTRL.LineScroll(m_TIPSCTRL.GetLineCount());<span class="comment">//滚动条置底</span></span><br><span class="line">  GetDlgItem(IDC_PASV)-&gt;EnableWindow(TRUE);</span><br><span class="line">  GetDlgItem(IDC_PORT)-&gt;EnableWindow(TRUE);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="附上最后的效果图"><a href="#附上最后的效果图" class="headerlink" title="附上最后的效果图"></a>附上最后的效果图</h3><p><img src="./images/360%E6%88%AA%E5%9B%BE.jpg" alt="enter description here"></p>
+<p><img src="/home/cjr/Downloads/blog/360%E6%88%AA%E5%9B%BE.jpg" alt="360截图"></p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+      <div>
+        <div style="padding: 10px 0; margin: 20px auto; width: 90%; text-align: center;">
+  <div></div>
+  <button id="rewardButton" disable="enable" onclick="var qr = document.getElementById('QR'); if (qr.style.display === 'none') {qr.style.display='block';} else {qr.style.display='none'}">
+    <span>打赏</span>
+  </button>
+  <div id="QR" style="display: none;">
+
+    
+      <div id="wechat" style="display: inline-block">
+        <img id="wechat_qr" src="/images/wechatpay.jpg" alt="CJR 微信支付">
+        <p>微信支付</p>
+      </div>
+    
+
+    
+      <div id="alipay" style="display: inline-block">
+        <img id="alipay_qr" src="/images/alipay.jpg" alt="CJR 支付宝">
+        <p>支付宝</p>
+      </div>
+    
+
+    
+
+  </div>
+</div>
+
+      </div>
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/socket/" rel="tag"># socket</a>
+          
+            <a href="/tags/c/" rel="tag"># c++</a>
+          
+            <a href="/tags/MFC/" rel="tag"># MFC</a>
+          
+            <a href="/tags/编程/" rel="tag"># 编程</a>
+          
+            <a href="/tags/FTP/" rel="tag"># FTP</a>
+          
+            <a href="/tags/网络协议/" rel="tag"># 网络协议</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2018/06/12/hello-world/" rel="next" title="Hello World">
+                <i class="fa fa-chevron-left"></i> Hello World
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2019/06/22/无线WLAN隧道转发模式下数据的封装以及转发过程/" rel="prev" title="无线WLAN隧道转发模式下数据的封装以及转发过程">
+                无线WLAN隧道转发模式下数据的封装以及转发过程 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+        <!-- JiaThis Button BEGIN -->
+<div class="jiathis_style">
+<span class="jiathis_txt">分享到：</span>
+<a class="jiathis_button_fav">收藏夹</a>
+<a class="jiathis_button_copy">复制网址</a>
+<a class="jiathis_button_email">邮件</a>
+<a class="jiathis_button_weixin">微信</a>
+<a class="jiathis_button_qzone">QQ空间</a>
+<a class="jiathis_button_tqq">腾讯微博</a>
+<a class="jiathis_button_douban">豆瓣</a>
+<a class="jiathis_button_share">一键分享</a>
+
+<a href="http://www.jiathis.com/share?uid=2140465" class="jiathis jiathis_txt jiathis_separator jtico jtico_jiathis" target="_blank">更多</a>
+<a class="jiathis_counter_style"></a>
+</div>
+<script type="text/javascript">
+var jiathis_config={
+  data_track_clickback:true,
+  summary:"",
+  shortUrl:false,
+  hideMore:false
+}
+</script>
+<script type="text/javascript" src="http://v3.jiathis.com/code/jia.js?uid=" charset="utf-8"></script>
+<!-- JiaThis Button END -->
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="disqus_thread">
+        <noscript>
+          Please enable JavaScript to view the
+          <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a>
+        </noscript>
+      </div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image" src="/images/one.png" alt="CJR">
+            
+              <p class="site-author-name" itemprop="name">CJR</p>
+              <p class="site-description motion-element" itemprop="description">搞IT不辛苦，就是头凉</p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">3</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">3</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">8</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+            <div class="feed-link motion-element">
+              <a href="/atom.xml" rel="alternate">
+                <i class="fa fa-rss"></i>
+                RSS
+              </a>
+            </div>
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/chenjiarui9612" target="_blank" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-github"></i>GitHub</a>
+                  </span>
+                
+                  <span class="links-of-author-item">
+                    <a href="mailto:13060554234@163.com" target="_blank" title="E-Mail">
+                      
+                        <i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                  </span>
+                
+                  <span class="links-of-author-item">
+                    <a href="https://weibo.com/u/3730907637?is_all=1" target="_blank" title="weibo">
+                      
+                        <i class="fa fa-fw fa-weibo"></i>weibo</a>
+                  </span>
+                
+                  <span class="links-of-author-item">
+                    <a href="https://jrblog.github.io/about" target="_blank" title="wechat">
+                      
+                        <i class="fa fa-fw fa-wechat"></i>wechat</a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#通过socket实现FTP客户端（MFC版）"><span class="nav-number">1.</span> <span class="nav-text">通过socket实现FTP客户端（MFC版）</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#被动模式的流程"><span class="nav-number">1.1.</span> <span class="nav-text">被动模式的流程</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#主动模式的流程"><span class="nav-number">1.2.</span> <span class="nav-text">主动模式的流程</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#客户端与服务器交互的常用命令"><span class="nav-number">1.3.</span> <span class="nav-text">客户端与服务器交互的常用命令</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#使用socket实现FTP客户端"><span class="nav-number">1.4.</span> <span class="nav-text">使用socket实现FTP客户端</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#创建socket"><span class="nav-number">1.4.1.</span> <span class="nav-text">创建socket</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#建立控制连接"><span class="nav-number">1.4.2.</span> <span class="nav-text">建立控制连接</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#定义SendCommand函数，用于客户端发送命令"><span class="nav-number">1.4.3.</span> <span class="nav-text">定义SendCommand函数，用于客户端发送命令</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#定义RecvRespond函数，用于客户端接收响应码"><span class="nav-number">1.4.4.</span> <span class="nav-text">定义RecvRespond函数，用于客户端接收响应码</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#验证用户名、口令"><span class="nav-number">1.4.5.</span> <span class="nav-text">验证用户名、口令</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#被动模式"><span class="nav-number">1.4.6.</span> <span class="nav-text">被动模式</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#主动模式"><span class="nav-number">1.4.7.</span> <span class="nav-text">主动模式</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#被动模式下载文件"><span class="nav-number">1.4.8.</span> <span class="nav-text">被动模式下载文件</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#主动模式下载文件"><span class="nav-number">1.4.9.</span> <span class="nav-text">主动模式下载文件</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#被动模式上传文件"><span class="nav-number">1.4.10.</span> <span class="nav-text">被动模式上传文件</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#主动模式上传文件"><span class="nav-number">1.4.11.</span> <span class="nav-text">主动模式上传文件</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#与服务器断开连接"><span class="nav-number">1.4.12.</span> <span class="nav-text">与服务器断开连接</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#附上最后的效果图"><span class="nav-number">1.4.13.</span> <span class="nav-text">附上最后的效果图</span></a></li></ol></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2019</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">CJR</span>
+
+  
+</div>
+
+
+
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+  
+    <span class="site-uv">
+      <i class="fa fa-user">本站访客数</i>
+      <span class="busuanzi-value" id="busuanzi_value_site_uv"></span>
+      次
+    </span>
+  
+
+  
+    <span class="site-pv">
+      <i class="fa fa-eye">本站总访问量</i>
+      <span class="busuanzi-value" id="busuanzi_value_site_pv"></span>
+      次
+    </span>
+  
+</div>
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/canvas-nest/canvas-nest.min.js"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.4"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+    
+      <script id="dsq-count-scr" src="https://.disqus.com/count.js" async></script>
+    
+
+    
+      <script type="text/javascript">
+        var disqus_config = function () {
+          this.page.url = 'http://jrblog.github.io/2019/04/18/通过socket实现FTP客户端（MFC版）/';
+          this.page.identifier = '2019/04/18/通过socket实现FTP客户端（MFC版）/';
+          this.page.title = 'socket实现FTP客户端';
+        };
+        var d = document, s = d.createElement('script');
+        s.src = 'https://.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', '' + +new Date());
+        (d.head || d.body).appendChild(s);
+      </script>
+    
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
